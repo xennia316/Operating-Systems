@@ -6,20 +6,24 @@
 #include <linux/jiffies.h>
 
 #define BUFFER_SIZE 128
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
+#define HAVE_PROC_OPS
+#endif
+
 #define PROC_NAME "seconds"
-
-//initialize memebers
-static struct file_operations proc_file_ops = {
-    .owner = THIS_MODULE,
-    .read = proc_read,
-};
-
 
 unsigned long start_jiffies = 0;
 
-ssize_t proc_read(struct file *file, char __user *usr_buf, ssize_t count, loff_t *pos)
+static struct proc_dir_entry *our_proc_file;
+
+ssize_t procfile_read(struct file *file, char __user *usr_buf, size_t count, loff_t *pos);
+
+//initialize memebers
+
+ssize_t procfile_read(struct file *file, char __user *usr_buf, size_t count, loff_t *pos)
 {
-    int unknown = 0;
+    int rv = 0;
     char buffer[BUFFER_SIZE];
     static int completed = 0;
     if (completed)
@@ -29,10 +33,14 @@ ssize_t proc_read(struct file *file, char __user *usr_buf, ssize_t count, loff_t
     }
 
     completed = 1;
-    unknown = sprintf(buffer, "Elapsed seconds: %lus\n", (jiffies - start_jiffies) / HZ);
-    raw_copy_to_user(usr_buf, buffer, unknown);
-    return unknown;
+    rv = sprintf(buffer, "Seconds passed: %lus\n", (jiffies - start_jiffies) / HZ);
+    raw_copy_to_user(usr_buf, buffer, rv);
+    return rv;
 }
+
+static const struct file_operations proc_file_fops = {
+    .read = procfile_read,
+};
 
 static int __init proc_init(void) {
     proc_create(PROC_NAME, 0644, NULL, &proc_file_fops);
