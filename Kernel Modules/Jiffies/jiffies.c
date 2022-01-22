@@ -1,46 +1,50 @@
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
-#include <linux/jiffies.h>    //jiffies variables
+#include <linux/jiffies.h> //jiffies variables
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
 
 #define BUFFER_SIZE 128
 #define PROC_NAME "jiffies"
 
-//function prototype
+// function prototype
 ssize_t proc_read(struct file *file, char *buf, size_t count, loff_t *pos);
 
-//initialize memebers
-static struct file_operations proc_file_ops = {
-    .owner = THIS_MODULE,
-    .read = proc_read,
+// initialize memebers
+static const struct proc_ops proc_file_fops = {
+    .proc_read = proc_read,
 };
 
-//function called when the kernel is loaded
-static int proc_init(void){
 
-    proc_create(PROC_NAME, 0, NULL, &proc_file_ops);
+// function called when the kernel is loaded
+static int proc_init(void)
+{
 
-    printk(KERN_INFO, "/proc/%s successfully created\n", PROC_NAME);
+    proc_create(PROC_NAME, 0, NULL, &proc_file_fops);
+
+    printk(KERN_INFO "/proc/%s successfully created\n", PROC_NAME);
 
     return 0;
 }
 
-//function called when the kernel is removed
-static void __exit proc_exit(void){
+// function called when the kernel is removed
+static void __exit proc_exit(void)
+{
 
     remove_proc_entry(PROC_NAME, NULL);
 
     printk(KERN_INFO "/proc/%s removed successfully\n", PROC_NAME);
 }
 
-ssize_t proc_read(struct file *file, char *buf, size_t count, loff_t *pos){
+ssize_t proc_read(struct file *file, char *usr_buf, size_t count, loff_t *pos)
+{
     int rv = 0;
     char buffer[BUFFER_SIZE];
     static int completed = 0;
 
-    if (completed) {
+    if (completed)
+    {
         completed = 0;
         return 0;
     }
