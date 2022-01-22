@@ -38,8 +38,8 @@ ssize_t procfile_read(struct file *file, char __user *usr_buf, size_t count, lof
     return rv;
 }
 
-static const struct file_operations proc_file_fops = {
-    .read = procfile_read,
+static const struct proc_ops proc_file_fops = {
+    .proc_read = procfile_read,
 };
 
 static int __init proc_init(void) {
