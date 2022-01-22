@@ -11,66 +11,50 @@ struct process{
     int rem_BT;
 };
 
-struct process getProcesses(int i);
+struct process getProcesses(int process_id);
 
 int main() {
-	int n, i = 0,t, j = 0, total, turnArrT = 0, quantum, counter, waitTime = 0,totalWaitingTime = 0, totalTurnArrTime;
+	int number_of_processes, i = 0,t, j = 0, total_time = 0, turnArrT = 0, quantum, counter, waitTime = 0,totalWaitingTime = 0, totalTurnArrTime;
+    int status;
 	float avgWaitingTime, avgTurnArrTime;
 	
-	printf("\nenter the number of processes:");
-	scanf("%d", &n);
+	printf("\nEnter the number of processes:");
+	scanf("%d", &number_of_processes);
 
     printf("Enter the quantum:");
     scanf("%d",& quantum);
 	
-	struct process proc[n];
-	int waitingTime[n], turnAT[n];
+	struct process proc[number_of_processes];
+	int waitingTime[number_of_processes], turnAT[number_of_processes];
 
 	//getting the processes into an array
-	for (i = 0; i < n; i++)
+	for (i = 0; i < number_of_processes; i++)
 		proc[i] = getProcesses(i+1); 
     
-    for (total = 0, i = 0; n != 0;) {
-        // printf("1. counter: %d, burst time: %d\n", counter, proc[i].burst_time); 
-        if(proc[i].burst_time <= quantum && proc[i].burst_time > 0) 
-        { 
-            printf("n: %d\n", n);
-            total = total + proc[i].burst_time; 
-            proc[i].burst_time = 0; 
-            counter = 1; 
-            // printf("2.counter: %d, burst time: %d\n", counter, proc[i].burst_time);
-        } 
-        else if(proc[i].burst_time > 0) 
-        { 
-            printf("burst time: %d\n", total);
-            proc[i].burst_time = proc[i].burst_time - quantum; 
-            total = total + quantum; 
+    i = 0;
+    do {
+        if (proc[i].rem_BT != 0) {
+            if (proc[i].rem_BT > quantum) {
+                proc[i].rem_BT -= quantum;
+                total_time += quantum;
+            }
+            else {
+                total_time += proc[i].rem_BT;
+            }
+            status = 0;
         }
-        printf("3.counter: %d, burst time: %d\n", counter, proc[i].burst_time);
-        if(counter == 1 && proc[i].burst_time == 0) 
-        { 
-                n--; 
-                printf("\nProcess[%d]\t\t%d\t\t %d\t\t\t %d", i + 1, proc[i].burst_time, total - 0, total - 0 - proc[i].burst_time);
-                waitTime= waitTime+ total - 0 - 
-                proc[i].burst_time; 
-                proc[i].waiting_time = waitTime;
-                turnArrT= turnArrT+ total - 0; 
-                counter = 0; 
-        } 
-        if(i == n - 1) 
-        {
-                i = 0; 
+        else if (proc[i].rem_BT == 0 && status != 0) {
+            status = 1;
         }
-        else 
-        {
-                i = 0;
+        i++;
+        if (i > number_of_processes) {
+            i = 0;
         }
-        // printf("%d\n", n);
-    } 
+    } while(!status);
 
     printf("Process\t\tburst time\twaiting time\tturn around time\n");
 
-	for(int i = 0; i<n; i++){
+	for(int i = 0; i < number_of_processes; i++){
 		printf("Process[%d]\t\t%d\t\t%d\t\t%d\n", proc[i].name,  proc[i].burst_time,proc[i].waiting_time,proc[i].turnAT);
 	}
 	printf("\n");
@@ -79,13 +63,13 @@ int main() {
 }
     
 
-struct process getProcesses(int i) {
+struct process getProcesses(int process_id) {
 	struct process p;
-	p.name = i;
-	printf("Enter process [%d] information:", i);
-	printf("\nEnter process burst time:");
-	scanf("%d",&p.burst_time);
-	printf("\nEnter process priority:");
-	scanf("%d",&p.priority);
+	p.name = process_id;
+	printf("\n\t\tEnter process [%d] information\n", process_id);
+	printf("Enter process burst time: ");
+	scanf("%d", &p.burst_time);
+	printf("Enter process priority: ");
+	scanf("%d", &p.priority);
 	return p;
 }
