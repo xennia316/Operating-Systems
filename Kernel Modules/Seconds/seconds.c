@@ -32,7 +32,6 @@ static void __exit proc_exit(void)
  {
 
     remove_proc_entry(PROC_NAME, NULL);
-
     printk(KERN_INFO "/proc/%s removed successfully\n", PROC_NAME);
 }
 
